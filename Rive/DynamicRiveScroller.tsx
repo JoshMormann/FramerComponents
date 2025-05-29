@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { addPropertyControls, ControlType } from "framer"
-import { useScroll, useTransform, motion } from "framer-motion"
+import { useScroll, useTransform, MotionValue } from "framer-motion"
 import { useRive, useStateMachineInput } from "@rive-app/react-canvas"
 
 type Props = {
@@ -29,6 +29,28 @@ export function SmartScrollRive({
     previewPosition = 0,
 }: Props) {
     const containerRef = useRef<HTMLDivElement>(null)
+    const [scrollProgress, setScrollProgress] = useState(0)
+
+    const isPreview =
+        typeof window !== "undefined" &&
+        window.location.href.includes("preview")
+
+    const { scrollYProgress }: { scrollYProgress: MotionValue<number> } =
+        useScroll({
+            target: containerRef,
+            offset: [`start ${startOffset}%`, `end ${endOffset}%`],
+        })
+
+    const scaled = useTransform(scrollYProgress, [0, 1], [
+        0,
+        100 * scrollSpeed,
+    ])
+    const clamped = useTransform(scaled, (v: number) =>
+        Math.max(0, Math.min(100, v))
+    )
+    const final = reverse
+        ? useTransform(clamped, (v: number) => 100 - v)
+        : clamped
 
     const { rive, RiveComponent } = useRive({
         src: riveFile || undefined,
@@ -39,39 +61,18 @@ export function SmartScrollRive({
 
     const numberInput = useStateMachineInput(rive, stateMachineName, inputName)
 
-    const isPreview =
-        typeof window !== "undefined" &&
-        window.location.href.includes("preview")
+    // Subscribe to scroll updates in preview mode
+    useEffect(() => {
+        if (!isPreview || !numberInput) return
 
-    // Only activate scroll observer in preview
-    const [scrollProgress, setScrollProgress] = useState(0)
-
-    if (isPreview) {
-        const { scrollYProgress } = useScroll({
-            target: containerRef,
-            offset: [`start ${startOffset}%`, `end ${endOffset}%`],
+        const unsubscribe = final.on("change", (value) => {
+            setScrollProgress(value)
         })
 
-        const scaled = useTransform(
-            scrollYProgress,
-            [0, 1],
-            [0, 100 * scrollSpeed]
-        )
-        const clamped = useTransform(scaled, (v) =>
-            Math.max(0, Math.min(100, v))
-        )
-        const final = reverse ? useTransform(clamped, (v) => 100 - v) : clamped
+        return () => unsubscribe()
+    }, [final, numberInput, isPreview])
 
-        // Subscribe to scroll updates only in preview
-        useEffect(() => {
-            const unsubscribe = final.on("change", (value) => {
-                setScrollProgress(value)
-            })
-            return () => unsubscribe()
-        }, [final])
-    }
-
-    // Set input value — design or preview mode
+    // Set input value (preview or design)
     useEffect(() => {
         if (!numberInput) return
 
@@ -183,3 +184,5 @@ addPropertyControls(SmartScrollRive, {
         defaultValue: 0,
     },
 })
+
+export default SmartScrollRive
