@@ -1,0 +1,37 @@
+# Framer Custom Code Components and Rive Integration Rules
+
+## General Framer Code Component Guidelines
+- All custom code components must be valid React functional components, compatible with React 18.
+- Use TypeScript for type safety and clear prop definitions.
+- Prefer Framer's `addPropertyControls` for exposing props to the Framer UI.
+- Avoid using browser APIs or libraries that are not supported in Framer's code sandbox environment.
+- Ensure components are self-contained and do not rely on global state or side effects outside the component scope.
+
+## Code Overrides Best Practices
+- Code overrides should be pure functions that accept Framer's props and return override objects.
+- Use Framer's official override API for interactions (e.g., `useAnimation`, `useCycle`).
+- Avoid direct DOM manipulation; always use React and Framer APIs.
+- Ensure overrides are performant and do not introduce memory leaks.
+
+## Rive Animations in Framer
+- Rive files should be embedded using the official Rive React library or Framer's Embed component.
+- Be aware of Framer's sandboxed execution: advanced Rive features (e.g., custom event listeners, file system access) may not work.
+- Limit Rive animations to those that can be controlled via props or simple state changes.
+- Document any Rive animation limitations or required workarounds in code comments.
+
+## Framer-Specific Limitations and Guidance
+- Do not use `window`, `document`, or other browser globals unless confirmed supported in Framer's environment.
+- Network requests should be made using `fetch` and must comply with CORS and Framer's security policies.
+- For custom cursors, use Framer's component-based cursor system and avoid legacy CSS cursor hacks[4][7].
+- If using Spline or other 3D embeds, use Framer's Embed component and set constraints for responsive design[7].
+
+## Collaboration and Source Control
+- All code components and overrides should be committed to Git with clear commit messages.
+- Document component props and override usage in JSDoc comments.
+- Encourage code reviews for all new components and overrides.
+
+## Additional Rule
+- When exposing a prop for design-time scrubbing (e.g., previewPosition), ensure it only controls the animation in Framer's design mode. In preview or published output, the animation should be controlled by runtime logic (e.g., scroll position).
+- Use Framer's environment detection (e.g., window.location or Framer APIs) to distinguish between design and preview modes.
+
+# End of rules
