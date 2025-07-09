@@ -117,12 +117,11 @@ const SocialIcon = ({
 
 export default function SocialMediaShareButtons(props: any) {
     const {
-        shareHeading,
         borderRadius,
         iconsSize,
-        iconsPadding,
-        headingColor,
-        headingFontFamily,
+        gap,
+        flexDirection,
+        flexWrap,
         containerPadding,
         showFacebook,
         showX,
@@ -135,51 +134,38 @@ export default function SocialMediaShareButtons(props: any) {
         iconStyle,
     } = props
     const allPlatforms = [
+        { key: "linkedin", show: showLinkedIn },
         { key: "facebook", show: showFacebook },
         { key: "x", show: showX },
-        { key: "linkedin", show: showLinkedIn },
+        { key: "instagram", show: showInstagram },
         { key: "whatsapp", show: showWhatsApp },
         { key: "gmail", show: showGmail },
         { key: "envelope", show: showEnvelope },
         { key: "copy", show: showCopy },
-        { key: "instagram", show: showInstagram },
     ];
     const enabledPlatforms = allPlatforms.filter(p => p.show).map(p => p.key);
     return (
-        <div style={{ ...containerStyle, padding: `${containerPadding}px` }}>
-            <h2 style={{ color: headingColor, fontFamily: headingFontFamily }}>
-                {shareHeading}
-            </h2>
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
-                {enabledPlatforms.map((platform, index) => (
-                    <SocialIcon
-                        key={index}
-                        type={platform}
-                        iconsStyles={{ borderRadius, iconsSize, iconsPadding }}
-                        iconStyle={iconStyle}
-                    />
-                ))}
-            </div>
+        <div style={{
+            ...containerStyle,
+            padding: `${containerPadding}px`,
+            display: "flex",
+            flexDirection,
+            flexWrap: flexWrap ? "wrap" : "nowrap",
+            gap: `${gap}px`,
+        }}>
+            {enabledPlatforms.map((platform, index) => (
+                <SocialIcon
+                    key={index}
+                    type={platform}
+                    iconsStyles={{ borderRadius, iconsSize, iconsPadding: 0 }}
+                    iconStyle={iconStyle}
+                />
+            ))}
         </div>
     )
 }
 
 addPropertyControls(SocialMediaShareButtons, {
-    shareHeading: {
-        type: ControlType.String,
-        title: "Heading",
-        defaultValue: "Share If You Like!",
-    },
-    headingColor: {
-        type: ControlType.Color,
-        title: "Heading color",
-        defaultValue: "#000",
-    },
-    headingFontFamily: {
-        type: ControlType.String,
-        title: "Heading Fonts",
-        defaultValue: "Inter",
-    },
     containerPadding: {
         type: ControlType.Number,
         title: "Container Padding",
@@ -193,16 +179,31 @@ addPropertyControls(SocialMediaShareButtons, {
         defaultValue: 25,
         min: 10,
     },
-    iconsPadding: {
-        type: ControlType.Number,
-        title: "Icons Padding",
-        defaultValue: 20,
-        min: 0,
-    },
     borderRadius: {
         type: ControlType.Number,
         title: "Border Radius",
         defaultValue: 0,
+    },
+    gap: {
+        type: ControlType.Number,
+        title: "Gap",
+        defaultValue: 8,
+        min: 0,
+        max: 64,
+    },
+    flexDirection: {
+        type: ControlType.Enum,
+        title: "Direction",
+        defaultValue: "row",
+        options: ["row", "column"],
+        optionTitles: ["Horizontal", "Vertical"],
+    },
+    flexWrap: {
+        type: ControlType.Boolean,
+        title: "Wrap",
+        defaultValue: true,
+        enabledTitle: "On",
+        disabledTitle: "Off",
     },
     iconStyle: {
         type: ControlType.Enum,
@@ -224,7 +225,6 @@ addPropertyControls(SocialMediaShareButtons, {
 const containerStyle = {
     height: "100%",
     width: "100%",
-    padding: "16px",
     fontFamily: "sans-serif",
     justifyContent: "center",
     alignItems: "center",
